@@ -41,13 +41,15 @@
 
 @implementation ViewController
 
-- (void)viewDidLoad {
+- (void)viewDidLoad
+{
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
 }
 
 
-- (void)didReceiveMemoryWarning {
+- (void)didReceiveMemoryWarning
+{
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
@@ -113,9 +115,12 @@
                             message:@"Oh my this looks like a nice message. Yes it does, and it can span multiple lines... all the way down.\n\nBut what's this? Even more lines? Why yes, now we can have even more content to show the world. Why? Because now you don't have to worry about the text overflowing off the screen. If text becomes too long to fit on the users display, it'll simply overflow and allow for the user to scroll. So now you're free to write however much you wish to write in an alert. A novel? An epic? Doesn't matter, because it can all now fit*. \n\n\n*Disclaimer: Within hardware and technical limitations, of course.\n\n To demonstrate, watch here:\nHere is a line.\nAnd here is another.\nAnd another.\nAnd another.\nAaaaaaand another.\nOh lookie here, AND another.\nAnd here's one more.\nFor good measure.\nAnd hello, newline.\n\n\nFeel free to expand your textual minds."
                         cancelTitle:@"Ok thanks, that's grand"
                          completion:^(BOOL cancelled, NSInteger buttonIndex) {
-                             if (cancelled) {
+                             if (cancelled)
+                             {
                                  NSLog(@"Larger Alert View cancelled");
-                             } else {
+                             }
+                             else
+                             {
                                  NSLog(@"Larger Alert View dismissed, but not cancelled");
                              }
                          }];
@@ -128,7 +133,8 @@
                                                  cancelTitle:@"Blue"
                                                   otherTitle:@"Red"
                                                   completion:^(BOOL cancelled, NSInteger buttonIndex) {
-                                                      if (cancelled) {
+                                                      if (cancelled)
+                                                      {
                                                           if (buttonIndex == 0)
                                                           {
                                                               NSLog(@"Cancel (Blue) button pressed");
@@ -137,18 +143,20 @@
                                                           {
                                                               NSLog(@"Cancel taped outside");
                                                           }
-                                                      } else {
+                                                      }
+                                                      else
+                                                      {
                                                           NSLog(@"Other (Red) button pressed");
                                                       }
                                                   }];
-
+    
     alertView.cancleBtnBgColor = [UIColor blueColor];
     alertView.otherBtnBgColor = [UIColor redColor];
     alertView.cancleBtnTextColor = [UIColor whiteColor];
     alertView.otherBtnTextColor = [UIColor whiteColor];
     
     alertView.alertGapLineColor = [UIColor yellowColor];
-
+    
     [alertView showAlertView];
 }
 
@@ -160,7 +168,8 @@
                                                   otherTitle:@"Red"
                                           buttonsShouldStack:YES
                                                   completion:^(BOOL cancelled, NSInteger buttonIndex) {
-                                                      if (cancelled) {
+                                                      if (cancelled)
+                                                      {
                                                           if (buttonIndex == 0)
                                                           {
                                                               NSLog(@"Cancel (Blue) button pressed");
@@ -169,7 +178,9 @@
                                                           {
                                                               NSLog(@"Cancel taped outside");
                                                           }
-                                                      } else {
+                                                      }
+                                                      else
+                                                      {
                                                           NSLog(@"Other (Red) button pressed");
                                                       }
                                                   }];
@@ -191,9 +202,12 @@
                                                  cancelTitle:@"No thanks"
                                                  otherTitles:@[ @"Too Hot", @"Luke Warm", @"Quite nippy" ]
                                                   completion:^(BOOL cancelled, NSInteger buttonIndex) {
-                                                      if (cancelled) {
+                                                      if (cancelled)
+                                                      {
                                                           NSLog(@"Cancel button pressed");
-                                                      } else {
+                                                      }
+                                                      else
+                                                      {
                                                           NSLog(@"Button with index %li pressed", (long)buttonIndex);
                                                       }
                                                   }];
@@ -217,27 +231,40 @@
                         contentView:view
                         cancelTitle:@"Ok"
                          otherTitle:nil
-                         completion:^(BOOL cancelled, NSInteger buttonIndex) {
+                         completion:^(BOOL cancelled, NSInteger buttonIndex){
                          }];
 }
 
 - (IBAction)show5StackedAlertViews:(id)sender
 {
-    for (int i = 1; i <= 5; i++) {
-        [DJAlertView showAlertWithTitle:[NSString stringWithFormat:@"Hello %@", @(i)]
-                                message:@"Oh my this looks like a nice message."
-                            cancelTitle:@"Ok"
-                             completion:^(BOOL cancelled, NSInteger buttonIndex) {}];
+    for (int i = 1; i <= 5; i++)
+    {
+        DJAlertView *alertView = [[DJAlertView alloc] initWithIcon:nil
+                                                             title:[NSString stringWithFormat:@"Hello %@", @(i)]
+                                                           message:@"Oh my this looks like a nice message."
+                                                       contentView:nil
+                                                       cancelTitle:@"OK"
+                                                       otherTitles:nil
+                                                buttonsShouldStack:NO
+                                                        completion:^(BOOL cancelled, NSInteger buttonIndex){
+                                                        }];
+        
+        alertView.showAnimationType = arc4random() % (DJAlertViewShowAnimationSlideInFromRight + 1);
+        alertView.hideAnimationType = arc4random() % (DJAlertViewHideAnimationSlideOutToRight + 1);
+        
+        [alertView showAlertView];
     }
 }
 
 - (IBAction)showOver5StackedAlertViews:(id)sender
 {
-    for (int i = 1; i <= 15; i++) {
+    for (int i = 1; i <= 15; i++)
+    {
         [DJAlertView showAlertWithTitle:[NSString stringWithFormat:@"Hello %@", @(i)]
                                 message:@"Oh my this looks like a nice message."
                             cancelTitle:@"Ok"
-                             completion:^(BOOL cancelled, NSInteger buttonIndex) {}];
+                             completion:^(BOOL cancelled, NSInteger buttonIndex){
+                             }];
     }
 }
 
@@ -252,7 +279,7 @@
 {
     DJAlertView *alertView = [DJAlertView showAlertWithTitle:@"No Animation" message:@"When dismissed"];
     dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC));
-    dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+    dispatch_after(popTime, dispatch_get_main_queue(), ^(void) {
         [alertView dismissWithClickedButtonIndex:0 animated:NO];
     });
 }
@@ -270,23 +297,33 @@
 {
     // 无感关闭
     DJAlertView *alertView = [DJAlertView showAlertWithTitle:@"No Animation" message:@"When dismissed"];
-    dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC));
-    dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+    alertView.showAnimationType = DJAlertViewShowAnimationNone;
+    dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC));
+    dispatch_after(popTime, dispatch_get_main_queue(), ^(void) {
         [alertView dismissWithClickedButtonIndex:0 animated:NO];
     });
     
     [DJAlertView showAlertWithTitle:[NSString stringWithFormat:@"Hello %@", @(1)]
                             message:@"Oh my this looks like a nice message."
                         cancelTitle:@"Ok"
-                         completion:^(BOOL cancelled, NSInteger buttonIndex) {}];
+                         completion:^(BOOL cancelled, NSInteger buttonIndex){
+                         }];
 }
 
 - (IBAction)cannotDismiss:(id)sender
 {
-    DJAlertView *alertView = [[DJAlertView alloc] initWithIcon:@"ExampleImage" title:@"Alert Alert!!" message:@"After pressing ok, the alert cannot disappear" contentView:nil cancelTitle:@"OK" otherTitles:nil buttonsShouldStack:NO completion:^(BOOL cancelled, NSInteger buttonIndex) {
-        NSLog(@"Cannot dismiss");
-    }];
+    DJAlertView *alertView = [[DJAlertView alloc] initWithIcon:@"ExampleImage"
+                                                         title:@"Alert Alert!!"
+                                                       message:@"After pressing ok, the alert cannot disappear"
+                                                   contentView:nil
+                                                   cancelTitle:@"OK"
+                                                   otherTitles:nil
+                                            buttonsShouldStack:NO
+                                                    completion:^(BOOL cancelled, NSInteger buttonIndex) {
+                                                        NSLog(@"Cannot dismiss");
+                                                    }];
     alertView.notDismissOnCancel = YES;
+    
     [alertView showAlertView];
 }
 

@@ -20,14 +20,14 @@ static const CGFloat DJAlertViewButtonHeight = 40.0f;
 static const CGFloat DJAlertViewLineLayerHeight = 1.0f;
 static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
 
-#define DJAlertViewMarkBgColor  [UIColor colorWithWhite:0 alpha:0.25]
-#define DJAlertViewBgColor      [UIColor colorWithWhite:0.9 alpha:1]
+#define DJAlertViewMarkBgColor          [UIColor colorWithWhite:0 alpha:0.25]
+#define DJAlertViewBgColor              [UIColor colorWithWhite:0.9 alpha:1]
 
-#define DJAlertViewTitleColor   [UIColor colorWithWhite:0 alpha:1];
-#define DJAlertViewTitleFont    [UIFont systemFontOfSize:16.0f];
-#define DJAlertViewMessageColor [UIColor colorWithWhite:0.2 alpha:1];
-#define DJAlertViewMessageFont  [UIFont systemFontOfSize:14.0f];
-#define DJAlertViewGapLineColor [UIColor colorWithWhite:0.8 alpha:0.6];
+#define DJAlertViewTitleColor           [UIColor colorWithWhite:0 alpha:1];
+#define DJAlertViewTitleFont            [UIFont systemFontOfSize:16.0f];
+#define DJAlertViewMessageColor         [UIColor colorWithWhite:0.2 alpha:1];
+#define DJAlertViewMessageFont          [UIFont systemFontOfSize:14.0f];
+#define DJAlertViewGapLineColor         [UIColor colorWithWhite:0.8 alpha:0.6];
 
 #define DJAlertViewCancleBtnBgColor     [UIColor redColor]
 #define DJAlertViewOtherBtnBgColor      [UIColor clearColor]
@@ -68,7 +68,7 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
 
 @property (nonatomic, assign) BOOL buttonsShouldStack;
 
-@property (nonatomic) UITapGestureRecognizer *tap;
+@property (nonatomic) UITapGestureRecognizer *tapOutside;
 
 @end
 
@@ -77,8 +77,8 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
 
 - (void)dealloc
 {
-    NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
-    [center removeObserver:self];
+    //NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+    //[center removeObserver:self];
 }
 
 - (UIWindow *)windowWithLevel:(UIWindowLevel)windowLevel
@@ -119,9 +119,12 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
         
         self.shouldDismissOnTapOutside = YES;
         
+        self.showAnimationType = DJAlertViewShowAnimationFadeIn;
+        self.hideAnimationType = DJAlertViewHideAnimationFadeOut;
+        
         CGRect frame = [self frameForOrientation];
         self.view.frame = frame;
-
+        
         self.iconName = iconName;
         
         if ([title isKindOfClass:[NSString class]])
@@ -266,12 +269,12 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
 
 - (void)setupGestures
 {
-    self.tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(dismiss:)];
-    [self.tap setNumberOfTapsRequired:1];
-    self.tap.enabled = self.shouldDismissOnTapOutside;
+    self.tapOutside = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(dismiss:)];
+    [self.tapOutside setNumberOfTapsRequired:1];
+    self.tapOutside.enabled = self.shouldDismissOnTapOutside;
     [self.backgroundView setUserInteractionEnabled:YES];
     [self.backgroundView setMultipleTouchEnabled:NO];
-    [self.backgroundView addGestureRecognizer:self.tap];
+    [self.backgroundView addGestureRecognizer:self.tapOutside];
     self.backgroundView.exclusiveTouch = YES;
 }
 
@@ -364,11 +367,11 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
         CALayer *lineLayer = self.lineLayerArray[0];
         lineLayer.frame = CGRectMake(0, 0, self.buttonBgView.width, DJAlertViewLineLayerHeight);
         lineLayer.backgroundColor = self.alertGapLineColor.CGColor;
-
+        
         CALayer *verticalLine = self.lineLayerArray[1];
         verticalLine.frame = CGRectMake((self.buttonBgView.width - DJAlertViewLineLayerHeight) * 0.5, 0, DJAlertViewLineLayerHeight, self.buttonHeight);
         verticalLine.backgroundColor = self.alertGapLineColor.CGColor;
-
+        
         UIButton *button = self.buttonArray[0];
         button.frame = CGRectMake(0, DJAlertViewLineLayerHeight, (self.buttonBgView.width - DJAlertViewLineLayerHeight) * 0.5, self.buttonHeight);
         button.backgroundColor = self.cancleBtnBgColor;
@@ -395,7 +398,7 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
             CALayer *lineLayer = self.lineLayerArray[index];
             lineLayer.frame = CGRectMake(0, top, self.buttonBgView.width, DJAlertViewLineLayerHeight);
             lineLayer.backgroundColor = self.alertGapLineColor.CGColor;
-
+            
             button.frame = CGRectMake(0, DJAlertViewLineLayerHeight + top, self.buttonBgView.width, self.buttonHeight);
             if (index == 0)
             {
@@ -428,15 +431,15 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
     
     CGFloat space = DJAlertViewVerticalElementSpace;
     CGFloat alertWidth = self.alertView.width;
-
+    
     self.alertView.width = alertWidth;
-
+    
     CGFloat iconWidth = 0;
     CGFloat iconHeight = 0;
     
     if (self.iconName)
     {
-        iconWidth =DJAlertViewIconWidth;
+        iconWidth = DJAlertViewIconWidth;
         iconHeight = DJAlertViewIconHeight;
         
         self.iconImageView.image = [UIImage imageNamed:self.iconName];
@@ -472,7 +475,7 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
     
     // Message
     self.messageScrollView.top = messageLabelTop;
-
+    
     if (self.alertMessageAttrStr)
     {
         self.messageLabel.attributedText = self.alertTitleAttrStr;
@@ -487,7 +490,7 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
     self.messageScrollView.contentSize = self.messageLabel.frame.size;
     
     // Get total button height
-    self.tap.enabled = self.shouldDismissOnTapOutside;
+    self.tapOutside.enabled = self.shouldDismissOnTapOutside;
     
     CGFloat totalButonHeight = [self freshButtons];
     
@@ -634,7 +637,7 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
 - (void)setShouldDismissOnTapOutside:(BOOL)shouldDismissOnTapOutside
 {
     _shouldDismissOnTapOutside = shouldDismissOnTapOutside;
-    self.tap.enabled = shouldDismissOnTapOutside;
+    self.tapOutside.enabled = shouldDismissOnTapOutside;
 }
 
 - (UIColor *)alertMarkBgColor
@@ -778,10 +781,41 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
 
 - (void)showInternal
 {
-    self.alertWindow.alpha = 1;
     self.alertWindow.rootViewController = self;
     [self.alertWindow makeKeyAndVisible];
+    
+    switch (self.showAnimationType)
+    {
+        case DJAlertViewShowAnimationFadeIn:
+            [self fadeIn];
+            break;
+            
+        case DJAlertViewShowAnimationSlideInFromBottom:
+            [self slideInFromBottom];
+            break;
+            
+        case DJAlertViewShowAnimationSlideInFromTop:
+            [self slideInFromTop];
+            break;
+            
+        case DJAlertViewShowAnimationSlideInFromLeft:
+            [self slideInFromLeft];
+            break;
+            
+        case DJAlertViewShowAnimationSlideInFromRight:
+            [self slideInFromRight];
+            break;
+            
+        default:
+            [self showCompletion];
+            break;
+    }
+}
 
+- (void)showCompletion
+{
+    self.alertWindow.alpha = 1;
+    
     self.visible = YES;
     
     [self showAlertAnimation];
@@ -800,6 +834,48 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
     [self dismiss:sender animated:YES];
 }
 
+- (void)doCompletion:(id)sender
+{
+    BOOL cancelled = NO;
+    if (sender == self.tapOutside || (self.buttonArray.count > 0 && sender == self.buttonArray[0]))
+    {
+        cancelled = YES;
+    }
+    NSInteger buttonIndex = -1;
+    if (sender && sender != self.tapOutside && self.buttonArray.count)
+    {
+        NSUInteger index = [self.buttonArray indexOfObject:sender];
+        if (index != NSNotFound)
+        {
+            buttonIndex = index;
+            [self clearBackgroundColorForButton:sender];
+        }
+    }
+    self.completion(cancelled, buttonIndex);
+}
+
+- (void)dismissCompletion:(id)sender
+{
+    self.alertWindow.alpha = 0;
+    
+    if (self.completion)
+    {
+        [self doCompletion:sender];
+    }
+    
+    if ([[DJAlertViewStack sharedInstance] getAlertViewCount] == 1)
+    {
+        //[self dismissAlertAnimation];
+        
+        self.alertWindow.rootViewController = nil;
+        self.alertWindow = nil;
+        
+        [self.mainWindow makeKeyAndVisible];
+    }
+    
+    [[DJAlertViewStack sharedInstance] pop:self];
+}
+
 - (void)dismiss:(id)sender animated:(BOOL)animated
 {
     if (self.notDismissOnCancel)
@@ -808,23 +884,7 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
         
         if (self.completion)
         {
-            BOOL cancelled = NO;
-            if (sender == self.tap || (self.buttonArray.count > 0 && sender == self.buttonArray[0]))
-            {
-                cancelled = YES;
-            }
-            NSInteger buttonIndex = -1;
-            if (sender && sender != self.tap && self.buttonArray.count)
-            {
-                NSUInteger index = [self.buttonArray indexOfObject:sender];
-                if (index != NSNotFound)
-                {
-                    buttonIndex = index;
-                    [self clearBackgroundColorForButton:sender];
-
-                }
-            }
-            self.completion(cancelled, buttonIndex);
+            [self doCompletion:sender];
         }
         
         return;
@@ -834,82 +894,36 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
     
     if (animated)
     {
-        [UIView animateWithDuration:0.2
-                         animations:^{
-                             self.alertWindow.alpha = 0;
-                         }
-                         completion:^(BOOL finished) {
-                             if (self.completion)
-                             {
-                                 BOOL cancelled = NO;
-                                 if (sender == self.tap || (self.buttonArray.count > 0 && sender == self.buttonArray[0]))
-                                 {
-                                     cancelled = YES;
-                                 }
-                                 NSInteger buttonIndex = -1;
-                                 if (sender && sender != self.tap && self.buttonArray.count)
-                                 {
-                                     NSUInteger index = [self.buttonArray indexOfObject:sender];
-                                     if (index != NSNotFound)
-                                     {
-                                         buttonIndex = index;
-                                         [self clearBackgroundColorForButton:sender];
-                                     }
-                                 }
-                                 self.completion(cancelled, buttonIndex);
-                             }
-                             
-                             if ([[DJAlertViewStack sharedInstance] getAlertViewCount] == 1)
-                             {
-                                 [self dismissAlertAnimation];
-                                 
-                                 [UIView animateWithDuration:0.2
-                                                  animations:^{
-                                                      self.alertWindow.rootViewController = nil;
-                                                      self.alertWindow = nil;
-                                                  }
-                                                  completion:^(BOOL finished) {
-                                                      [self.mainWindow makeKeyAndVisible];
-                                                  }];
-                             }
-                             
-                             [[DJAlertViewStack sharedInstance] pop:self];
-                         }];
+        switch (self.hideAnimationType)
+        {
+            case DJAlertViewHideAnimationFadeOut:
+                [self fadeOut:sender];
+                break;
+                
+            case DJAlertViewHideAnimationSlideOutToBottom:
+                [self slideOutToBottom:sender];
+                break;
+                
+            case DJAlertViewHideAnimationSlideOutToTop:
+                [self slideOutToTop:sender];
+                break;
+                
+            case DJAlertViewHideAnimationSlideOutToLeft:
+                [self slideOutToLeft:sender];
+                break;
+                
+            case DJAlertViewHideAnimationSlideOutToRight:
+                [self slideOutToRight:sender];
+                break;
+                
+            default:
+                 [self dismissCompletion:sender];
+                break;
+        }
     }
     else
     {
-        self.alertWindow.alpha = 0;
-        
-        if (self.completion)
-        {
-            BOOL cancelled = NO;
-            if (sender == self.tap || (self.buttonArray.count > 0 && sender == self.buttonArray[0]))
-            {
-                cancelled = YES;
-            }
-            NSInteger buttonIndex = -1;
-            if (sender && sender != self.tap && self.buttonArray.count)
-            {
-                NSUInteger index = [self.buttonArray indexOfObject:sender];
-                if (index != NSNotFound)
-                {
-                    buttonIndex = index;
-                    [self clearBackgroundColorForButton:sender];
-                }
-            }
-            self.completion(cancelled, buttonIndex);
-        }
-        
-        if ([[DJAlertViewStack sharedInstance] getAlertViewCount] == 1)
-        {
-            [self dismissAlertAnimation];
-            
-            self.alertWindow.rootViewController = nil;
-            self.alertWindow = nil;
-            [self.mainWindow makeKeyAndVisible];
-        }
-        
-        [[DJAlertViewStack sharedInstance] pop:self];
+        [self dismissCompletion:sender];
     }
 }
 
@@ -940,6 +954,178 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
     animation.duration = 0.2;
     
     [self.alertView.layer addAnimation:animation forKey:@"dismissAlert"];
+}
+
+
+#pragma mark -
+#pragma mark Show Animations
+
+- (void)fadeIn
+{
+    self.alertWindow.alpha = 0.0f;
+    
+    [UIView animateWithDuration:0.3f
+                          delay:0.0f
+                        options:UIViewAnimationOptionCurveEaseIn
+                     animations:^{
+                         self.alertWindow.alpha = 1.0f;
+                     }
+                     completion:^(BOOL finished) {
+                         [self showCompletion];
+                     }];
+}
+
+- (void)slideInFromBottom
+{
+    self.alertWindow.alpha = 1.0f;
+    
+    //From Frame
+    CGRect frame = [self frameForOrientation];
+    self.alertView.top = frame.size.height;
+    
+    [UIView animateWithDuration:0.3f
+                     animations:^{
+                         
+                         //To Frame
+                         [self centerAlertView];
+                         
+                     }
+                     completion:^(BOOL completed) {
+                         [self showCompletion];
+                     }];
+}
+
+- (void)slideInFromTop
+{
+    self.alertWindow.alpha = 1.0f;
+    //From Frame
+    self.alertView.top = -self.alertView.height;
+    
+    [UIView animateWithDuration:0.3f
+                     animations:^{
+                         
+                         //To Frame
+                         [self centerAlertView];
+                         
+                     }
+                     completion:^(BOOL completed) {
+                         [self showCompletion];
+                     }];
+}
+
+- (void)slideInFromLeft
+{
+    self.alertWindow.alpha = 1.0f;
+    //From Frame
+    self.alertView.left = -self.alertView.width;
+    
+    [UIView animateWithDuration:0.3f
+                     animations:^{
+                         
+                         //To Frame
+                         [self centerAlertView];
+                         
+                     }
+                     completion:^(BOOL completed) {
+                         [self showCompletion];
+                     }];
+}
+
+- (void)slideInFromRight
+{
+    self.alertWindow.alpha = 1.0f;
+    
+    //From Frame
+    CGRect frame = [self frameForOrientation];
+    self.alertView.left = frame.size.width;
+    
+    [UIView animateWithDuration:0.3f
+                     animations:^{
+                         
+                         //To Frame
+                         [self centerAlertView];
+                         
+                     }
+                     completion:^(BOOL completed) {
+                         [self showCompletion];
+                     }];
+}
+
+
+#pragma mark -
+#pragma mark Hide Animations
+
+- (void)fadeOut:(id)sender
+{
+    [UIView animateWithDuration:0.3f
+                     animations:^{
+                         self.alertWindow.alpha = 0;
+                     }
+                     completion:^(BOOL finished) {
+                         [self dismissCompletion:sender];
+                     }];
+}
+
+- (void)slideOutToBottom:(id)sender
+{
+    [UIView animateWithDuration:0.3f
+                     animations:^{
+                         
+                         self.alertWindow.alpha = 0;
+                         
+                         CGRect frame = [self frameForOrientation];
+                         self.alertView.top = frame.size.height;
+                         
+                     }
+                     completion:^(BOOL completed) {
+                         [self dismissCompletion:sender];
+                     }];
+}
+
+- (void)slideOutToTop:(id)sender
+{
+    [UIView animateWithDuration:0.3f
+                     animations:^{
+                         
+                         self.alertWindow.alpha = 0;
+                         
+                         self.alertView.top = -self.alertView.height;
+                         
+                     }
+                     completion:^(BOOL completed) {
+                         [self dismissCompletion:sender];
+                     }];
+}
+
+- (void)slideOutToLeft:(id)sender
+{
+    [UIView animateWithDuration:0.3f
+                     animations:^{
+                         
+                         self.alertWindow.alpha = 0;
+                         
+                         self.alertView.left = -self.alertView.width;
+                         
+                     }
+                     completion:^(BOOL completed) {
+                         [self dismissCompletion:sender];
+                     }];
+}
+
+- (void)slideOutToRight:(id)sender
+{
+    [UIView animateWithDuration:0.3f
+                     animations:^{
+                         
+                         self.alertWindow.alpha = 0;
+                         
+                         CGRect frame = [self frameForOrientation];
+                         self.alertView.left = frame.size.width;
+                         
+                     }
+                     completion:^(BOOL completed) {
+                         [self dismissCompletion:sender];
+                     }];
 }
 
 
@@ -1104,7 +1290,7 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
     
     if (index < 0)
     {
-        sender = self.tap;
+        sender = self.tapOutside;
     }
     else if (index == 0)
     {

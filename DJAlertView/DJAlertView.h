@@ -13,6 +13,26 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+typedef NS_ENUM(NSInteger, DJAlertViewShowAnimation)
+{
+    DJAlertViewShowAnimationNone,
+    DJAlertViewShowAnimationFadeIn,
+    DJAlertViewShowAnimationSlideInFromBottom,
+    DJAlertViewShowAnimationSlideInFromTop,
+    DJAlertViewShowAnimationSlideInFromLeft,
+    DJAlertViewShowAnimationSlideInFromRight
+};
+
+typedef NS_ENUM(NSInteger, DJAlertViewHideAnimation)
+{
+    DJAlertViewHideAnimationNone,
+    DJAlertViewHideAnimationFadeOut,
+    DJAlertViewHideAnimationSlideOutToBottom,
+    DJAlertViewHideAnimationSlideOutToTop,
+    DJAlertViewHideAnimationSlideOutToLeft,
+    DJAlertViewHideAnimationSlideOutToRight
+};
+
 typedef void (^DJAlertViewCompletionBlock)(BOOL cancelled, NSInteger buttonIndex);
 
 @interface DJAlertView : UIViewController
@@ -46,6 +66,8 @@ typedef void (^DJAlertViewCompletionBlock)(BOOL cancelled, NSInteger buttonIndex
 @property (nonatomic, strong) UIColor *otherBtnTextColor;
 @property (nonatomic, strong) UIFont *btnFont;
 
+@property (nonatomic, assign) DJAlertViewShowAnimation showAnimationType;
+@property (nonatomic, assign) DJAlertViewHideAnimation hideAnimationType;
 
 @property (nullable, nonatomic, copy) DJAlertViewCompletionBlock completion;
 

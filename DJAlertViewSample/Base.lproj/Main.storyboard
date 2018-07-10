@@ -90,7 +90,6 @@
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                 <state key="normal" title="Show Over 5 Stacked Alert Views"/>
                                 <connections>
-                                    <action selector="show5StackedAlertViews:" destination="BYZ-38-t0r" eventType="touchUpInside" id="cFT-gb-AiN"/>
                                     <action selector="showOver5StackedAlertViews:" destination="BYZ-38-t0r" eventType="touchUpInside" id="JEt-YK-Mkl"/>
                                 </connections>
                             </button>
