@@ -13,7 +13,7 @@
 
 static const CGFloat DJAlertViewWidth = 270.0f;
 static const CGFloat DJAlertViewContentMargin = 30.0f;
-static const CGFloat DJAlertViewVerticalElementSpace = 5.0f;
+static const CGFloat DJAlertViewVerticalElementSpace = 12.0f;
 static const CGFloat DJAlertViewIconWidth = 90.0f;
 static const CGFloat DJAlertViewIconHeight = 90.0f;
 static const CGFloat DJAlertViewButtonHeight = 40.0f;
@@ -27,10 +27,10 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
 #define DJAlertViewTitleFont            [UIFont systemFontOfSize:16.0f];
 #define DJAlertViewMessageColor         [UIColor colorWithWhite:0.2 alpha:1];
 #define DJAlertViewMessageFont          [UIFont systemFontOfSize:14.0f];
-#define DJAlertViewGapLineColor         [UIColor colorWithWhite:0.8 alpha:0.6];
+#define DJAlertViewGapLineColor         [UIColor colorWithWhite:0.8 alpha:1];
 
-#define DJAlertViewCancleBtnBgColor     [UIColor redColor]
-#define DJAlertViewOtherBtnBgColor      [UIColor clearColor]
+#define DJAlertViewCancleBtnBgColor     [UIColor colorWithWhite:0.9 alpha:1]
+#define DJAlertViewOtherBtnBgColor      [UIColor colorWithWhite:0.9 alpha:1]
 #define DJAlertViewCancleBtnTextColor   [UIColor blueColor]
 #define DJAlertViewOtherBtnTextColor    [UIColor blueColor]
 #define DJAlertViewBtnFont              [UIFont systemFontOfSize:16.0f];
@@ -45,6 +45,9 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
 @end
 
 @interface DJAlertView ()
+<
+    UIScrollViewDelegate
+>
 
 @property (nonatomic, assign, getter=isVisible) BOOL visible;
 
@@ -60,6 +63,7 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
 @property (nonatomic, strong) UIImageView *iconImageView;
 @property (nonatomic, strong) UILabel *titleLabel;
 @property (nonatomic, strong) UIScrollView *messageScrollView;
+@property (nonatomic, strong) CAGradientLayer *messageScrollGradient;
 @property (nonatomic, strong) UILabel *messageLabel;
 
 @property (nonatomic, strong) UIView *buttonBgView;
@@ -203,15 +207,19 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
         // Message
         self.messageScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(DJAlertViewContentMargin, 0, alertWidth - DJAlertViewContentMargin * 2, 10)];
         self.messageScrollView.scrollEnabled = YES;
+        self.messageScrollView.delegate = self;
         
         self.messageLabel = [[UILabel alloc] initWithFrame:(CGRect){0, 0, self.messageScrollView.frame.size}];
         self.messageLabel.backgroundColor = [UIColor clearColor];
         self.messageLabel.textAlignment = NSTextAlignmentCenter;
         self.messageLabel.lineBreakMode = NSLineBreakByWordWrapping;
         self.messageLabel.numberOfLines = 0;
-        
         [self.messageScrollView addSubview:self.messageLabel];
+        
         [self.alertView addSubview:self.messageScrollView];
+
+        self.messageScrollGradient = [CAGradientLayer layer];
+        [self.alertView.layer addSublayer:self.messageScrollGradient];
         
         // Buttons
         self.buttonsShouldStack = shouldStack;
@@ -286,7 +294,7 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
     button.titleLabel.adjustsFontSizeToFitWidth = YES;
     button.titleEdgeInsets = UIEdgeInsetsMake(2, 2, 2, 2);
     [button setTitleColor:[UIColor blueColor] forState:UIControlStateNormal];
-    [button setTitleColor:[[UIColor blueColor] colorByLighteningTo:0.5f] forState:UIControlStateHighlighted];
+    [button setTitleColor:[[UIColor blueColor] colorByDarkeningTo:0.8f] forState:UIControlStateHighlighted];
     [button addTarget:self action:@selector(dismiss:) forControlEvents:UIControlEventTouchUpInside];
     [button addTarget:self action:@selector(setBackgroundColorForButton:) forControlEvents:UIControlEventTouchDown];
     [button addTarget:self action:@selector(setBackgroundColorForButton:) forControlEvents:UIControlEventTouchDragEnter];
@@ -300,11 +308,11 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
 {
     if (sender.tag == 0)
     {
-        [sender setBackgroundColor:[self.cancleBtnBgColor colorByLighteningTo:0.5f]];
+        [sender setBackgroundColor:[self.cancleBtnBgColor colorByDarkeningTo:0.8f]];
     }
     else
     {
-        [sender setBackgroundColor:[self.otherBtnBgColor colorByLighteningTo:0.5f]];
+        [sender setBackgroundColor:[self.otherBtnBgColor colorByDarkeningTo:0.8f]];
     }
     sender.highlighted = YES;
 }
@@ -358,7 +366,7 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
         button.backgroundColor = self.cancleBtnBgColor;
         button.titleLabel.font = self.btnFont;
         [button setTitleColor:self.cancleBtnTextColor forState:UIControlStateNormal];
-        [button setTitleColor:[self.cancleBtnTextColor colorByLighteningTo:0.5f] forState:UIControlStateHighlighted];
+        [button setTitleColor:[self.cancleBtnTextColor colorByDarkeningTo:0.8f] forState:UIControlStateHighlighted];
         
         return DJAlertViewLineLayerHeight + self.buttonHeight;
     }
@@ -377,14 +385,14 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
         button.backgroundColor = self.cancleBtnBgColor;
         button.titleLabel.font = self.btnFont;
         [button setTitleColor:self.cancleBtnTextColor forState:UIControlStateNormal];
-        [button setTitleColor:[self.cancleBtnTextColor colorByLighteningTo:0.5f] forState:UIControlStateHighlighted];
+        [button setTitleColor:[self.cancleBtnTextColor colorByDarkeningTo:0.8f] forState:UIControlStateHighlighted];
         
         button = self.buttonArray[1];
         button.frame = CGRectMake((self.buttonBgView.width + DJAlertViewLineLayerHeight) * 0.5, DJAlertViewLineLayerHeight, (self.buttonBgView.width - DJAlertViewLineLayerHeight) * 0.5, self.buttonHeight);
         button.backgroundColor = self.otherBtnBgColor;
         button.titleLabel.font = self.btnFont;
         [button setTitleColor:self.otherBtnTextColor forState:UIControlStateNormal];
-        [button setTitleColor:[self.otherBtnTextColor colorByLighteningTo:0.5f] forState:UIControlStateHighlighted];
+        [button setTitleColor:[self.otherBtnTextColor colorByDarkeningTo:0.8f] forState:UIControlStateHighlighted];
         
         return DJAlertViewLineLayerHeight + self.buttonHeight;
     }
@@ -405,14 +413,14 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
                 button.backgroundColor = self.cancleBtnBgColor;
                 button.titleLabel.font = self.btnFont;
                 [button setTitleColor:self.cancleBtnTextColor forState:UIControlStateNormal];
-                [button setTitleColor:[self.cancleBtnTextColor colorByLighteningTo:0.5f] forState:UIControlStateHighlighted];
+                [button setTitleColor:[self.cancleBtnTextColor colorByDarkeningTo:0.8f] forState:UIControlStateHighlighted];
             }
             else
             {
                 button.backgroundColor = self.otherBtnBgColor;
                 button.titleLabel.font = self.btnFont;
                 [button setTitleColor:self.otherBtnTextColor forState:UIControlStateNormal];
-                [button setTitleColor:[self.otherBtnTextColor colorByLighteningTo:0.5f] forState:UIControlStateHighlighted];
+                [button setTitleColor:[self.otherBtnTextColor colorByDarkeningTo:0.8f] forState:UIControlStateHighlighted];
             }
             
             index++;
@@ -431,8 +439,6 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
     
     CGFloat space = DJAlertViewVerticalElementSpace;
     CGFloat alertWidth = self.alertView.width;
-    
-    self.alertView.width = alertWidth;
     
     CGFloat iconWidth = 0;
     CGFloat iconHeight = 0;
@@ -509,6 +515,20 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
         self.messageScrollView.frame.size.width,
         MIN(self.messageLabel.frame.size.height, self.alertWindow.frame.size.height - self.messageScrollView.frame.origin.y - totalButonHeight - margin * 2)};
     self.messageScrollView.frame = scrollViewFrame;
+    if (self.messageScrollView.height < self.messageLabel.height)
+    {
+        self.messageScrollGradient.hidden = NO;
+        self.messageScrollGradient.frame = CGRectMake(self.messageScrollView.left, self.messageScrollView.bottom-30.0f, self.messageScrollView.width, 30.0f);
+        self.messageScrollGradient.startPoint = CGPointMake(0, 1.0);
+        self.messageScrollGradient.endPoint = CGPointMake(0, 0);
+        UIColor *starColor = self.alertBgColor;
+        UIColor *endColor = [self.alertBgColor changeAlpha:0.4f];
+        self.messageScrollGradient.colors = [NSArray arrayWithObjects: (id)starColor.CGColor, (id)endColor.CGColor, nil];
+    }
+    else
+    {
+        self.messageScrollGradient.hidden = YES;
+    }
     
     self.buttonBgView.top = DJAlertViewVerticalElementSpace + self.messageScrollView.bottom;
     self.buttonBgView.height = totalButonHeight;
@@ -629,6 +649,22 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
 //{
 //    [self centerAlertView];
 //}
+
+
+#pragma mark -
+#pragma mark UIScrollViewDelegate
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView
+{
+    if (scrollView.contentOffset.y >= self.messageScrollView.contentSize.height-self.messageScrollView.height)
+    {
+        self.messageScrollGradient.hidden = YES;
+    }
+    else
+    {
+        self.messageScrollGradient.hidden = NO;
+    }
+}
 
 
 #pragma mark -

@@ -74,6 +74,8 @@ typedef NS_ENUM(NSUInteger, DJButtonEdgeInsetsStyle)
 + (UIColor *)colorWithHex:(UInt32)hex;
 + (UIColor *)colorWithHex:(UInt32)hex alpha:(CGFloat)alpha;
 
+- (UIColor *)changeAlpha:(CGFloat)alpha;
+
 - (UIColor *)colorByLighteningToRed:(CGFloat)red green:(CGFloat)green blue:(CGFloat)blue alpha:(CGFloat)alpha;
 - (UIColor *)colorByDarkeningToRed:(CGFloat)red green:(CGFloat)green blue:(CGFloat)blue alpha:(CGFloat)alpha;
 

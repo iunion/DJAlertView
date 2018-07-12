@@ -371,6 +371,19 @@
     return YES;
 }
 
+- (UIColor *)changeAlpha:(CGFloat)alpha
+{
+    NSAssert(self.canProvideRGBComponents, @"Must be a RGB color to use arithmetic operations");
+    
+    CGFloat r,g,b,a;
+    if (![self red:&r green:&g blue:&b alpha:&a]) return nil;
+    
+    return [UIColor colorWithRed:r
+                           green:g
+                            blue:b
+                           alpha:alpha];
+}
+
 - (UIColor *)colorByLighteningToRed:(CGFloat)red green:(CGFloat)green blue:(CGFloat)blue alpha:(CGFloat)alpha
 {
     NSAssert(self.canProvideRGBComponents, @"Must be a RGB color to use arithmetic operations");
