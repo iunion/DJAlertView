@@ -79,6 +79,8 @@
                                                           NSLog(@"Simple Alert View dismissed, but not cancelled");
                                                       }
                                                   }];
+    alertView.alertMarkBgEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleLight];
+    alertView.alertMarkBgColor = [UIColor colorWithHex:0x0000FF alpha:0.1];
     [alertView showAlertView];
 }
 

@@ -42,6 +42,8 @@ typedef void (^DJAlertViewCompletionBlock)(BOOL cancelled, NSInteger buttonIndex
 @property (nonatomic, assign) BOOL shouldDismissOnTapOutside;
 @property (nonatomic, assign) BOOL notDismissOnCancel;
 
+@property (nonatomic, strong, readonly) UIVisualEffectView *alertMarkBgEffectView;
+@property (nullable, nonatomic, strong) UIVisualEffect *alertMarkBgEffect;
 @property (nonatomic, strong) UIColor *alertMarkBgColor;
 @property (nonatomic, strong) UIColor *alertBgColor;
 

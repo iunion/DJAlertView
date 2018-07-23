@@ -20,6 +20,8 @@ static const CGFloat DJAlertViewButtonHeight = 40.0f;
 static const CGFloat DJAlertViewLineLayerHeight = 1.0f;
 static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
 
+#define DJAlertViewMarkBgDefaultEffect  [UIBlurEffect effectWithStyle:UIBlurEffectStyleLight]
+
 #define DJAlertViewMarkBgColor          [UIColor colorWithWhite:0 alpha:0.25]
 #define DJAlertViewBgColor              [UIColor colorWithWhite:0.9 alpha:1]
 
@@ -56,6 +58,7 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
 @property (nonatomic, strong) UIWindow *alertWindow;
 
 @property (nonatomic, strong) UIView *backgroundView;
+@property (nonatomic, strong) UIVisualEffectView *alertMarkBgEffectView;
 @property (nonatomic, strong) UIView *alertView;
 
 @property (nonatomic, strong) UIView *contentView;
@@ -170,6 +173,13 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
         self.buttonArray = [NSMutableArray arrayWithCapacity:btnTitles.count];
         self.lineLayerArray = [NSMutableArray arrayWithCapacity:btnTitles.count];
         
+        self.alertMarkBgEffect = DJAlertViewMarkBgDefaultEffect;
+        self.alertMarkBgEffectView = [[UIVisualEffectView alloc] initWithEffect:self.alertMarkBgEffect];
+        self.alertMarkBgEffectView.alpha = 0.8f;
+        self.alertMarkBgEffectView.backgroundColor = [UIColor clearColor];
+        self.alertMarkBgEffectView.frame = self.view.bounds;
+        [self.view addSubview:self.alertMarkBgEffectView];
+        
         self.backgroundView = [[UIView alloc] initWithFrame:frame];
         self.backgroundView.backgroundColor = self.alertMarkBgColor;
         [self.view addSubview:self.backgroundView];
@@ -219,6 +229,8 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
         [self.alertView addSubview:self.messageScrollView];
 
         self.messageScrollGradient = [CAGradientLayer layer];
+        self.messageScrollGradient.startPoint = CGPointMake(0, 1.0);
+        self.messageScrollGradient.endPoint = CGPointMake(0, 0);
         [self.alertView.layer addSublayer:self.messageScrollGradient];
         
         // Buttons
@@ -280,10 +292,11 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
     self.tapOutside = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(dismiss:)];
     [self.tapOutside setNumberOfTapsRequired:1];
     self.tapOutside.enabled = self.shouldDismissOnTapOutside;
-    [self.backgroundView setUserInteractionEnabled:YES];
-    [self.backgroundView setMultipleTouchEnabled:NO];
-    [self.backgroundView addGestureRecognizer:self.tapOutside];
+
+    self.backgroundView.userInteractionEnabled = YES;
+    self.backgroundView.multipleTouchEnabled = NO;
     self.backgroundView.exclusiveTouch = YES;
+    [self.backgroundView addGestureRecognizer:self.tapOutside];
 }
 
 - (UIButton *)genericButton:(NSUInteger)btnIndex
@@ -434,6 +447,8 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
 
 - (void)freshAlertView
 {
+    self.alertMarkBgEffectView.effect = self.alertMarkBgEffect;
+    //self.alertMarkBgEffectView.backgroundColor = self.alertMarkBgColor;
     self.backgroundView.backgroundColor = self.alertMarkBgColor;
     self.alertView.backgroundColor = self.alertBgColor;
     
@@ -519,8 +534,6 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
     {
         self.messageScrollGradient.hidden = NO;
         self.messageScrollGradient.frame = CGRectMake(self.messageScrollView.left, self.messageScrollView.bottom-30.0f, self.messageScrollView.width, 30.0f);
-        self.messageScrollGradient.startPoint = CGPointMake(0, 1.0);
-        self.messageScrollGradient.endPoint = CGPointMake(0, 0);
         UIColor *starColor = self.alertBgColor;
         UIColor *endColor = [self.alertBgColor changeAlpha:0.4f];
         self.messageScrollGradient.colors = [NSArray arrayWithObjects: (id)starColor.CGColor, (id)endColor.CGColor, nil];
@@ -534,12 +547,13 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
     self.buttonBgView.height = totalButonHeight;
     
     self.alertView.height = self.buttonBgView.bottom;
-    self.alertView.center = [self centerWithFrame:self.backgroundView.bounds];
+    self.alertView.center = [self centerWithFrame:self.alertMarkBgEffectView.bounds];
 }
 
 - (void)centerAlertView
 {
     CGRect frame = [self frameForOrientation];
+    self.alertMarkBgEffectView.frame = frame;
     self.backgroundView.frame = frame;
     self.alertView.center = [self centerWithFrame:frame];
 }
