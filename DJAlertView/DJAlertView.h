@@ -39,6 +39,9 @@ typedef void (^DJAlertViewCompletionBlock)(BOOL cancelled, NSInteger buttonIndex
 
 @property (nonatomic, assign, readonly, getter=isVisible) BOOL visible;
 
+// 是否显示关闭按钮
+@property (nonatomic, assign) BOOL showClose;
+
 @property (nonatomic, assign) BOOL shouldDismissOnTapOutside;
 @property (nonatomic, assign) BOOL notDismissOnCancel;
 
@@ -136,7 +139,7 @@ typedef void (^DJAlertViewCompletionBlock)(BOOL cancelled, NSInteger buttonIndex
                 buttonsShouldStack:(BOOL)shouldStack
                         completion:(nullable DJAlertViewCompletionBlock)completion;
 
-+ (instancetype)alertWithTitle:(nullable id)title
++ (nullable instancetype)alertWithTitle:(nullable id)title
                        message:(nullable id)message
                    contentView:(nullable UIView *)contentView
                    cancelTitle:(nullable NSString *)cancelTitle
@@ -153,7 +156,7 @@ typedef void (^DJAlertViewCompletionBlock)(BOOL cancelled, NSInteger buttonIndex
           buttonsShouldStack:(BOOL)shouldStack
                   completion:(nullable DJAlertViewCompletionBlock)completion;
 
-- (UIButton *)getButtonAtIndex:(NSUInteger)index;
+- (nullable UIButton *)getButtonAtIndex:(NSUInteger)index;
 
 - (void)showAlertView;
 

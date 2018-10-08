@@ -7,6 +7,7 @@
 //
 
 #import "DJAlertViewHelp.h"
+#import <objc/runtime.h>
 
 @implementation NSString (Size)
 
@@ -185,8 +186,127 @@
 
 @end
 
+#define SetNSErrorFor(FUNC, ERROR_VAR, FORMAT,...)    \
+if (ERROR_VAR) {    \
+NSString *errStr = [NSString stringWithFormat:@"%s: " FORMAT,FUNC,##__VA_ARGS__]; \
+*ERROR_VAR = [NSError errorWithDomain:@"NSCocoaErrorDomain" \
+code:-1    \
+userInfo:[NSDictionary dictionaryWithObject:errStr forKey:NSLocalizedDescriptionKey]]; \
+}
+#define SetNSError(ERROR_VAR, FORMAT,...) SetNSErrorFor(__func__, ERROR_VAR, FORMAT, ##__VA_ARGS__)
+
+#if OBJC_API_VERSION >= 2
+#define GetClass(obj)    object_getClass(obj)
+#else
+#define GetClass(obj)    (obj ? obj->isa : Nil)
+#endif
+
+@implementation NSObject (BMSwizzle)
+
++ (BOOL)swizzleMethod:(SEL)originalSEL withMethod:(SEL)swizzledSEL error:(NSError **)error
+{
+    Class class = [self class];
+    
+    Method originalMethod = class_getInstanceMethod(class, originalSEL);
+    if (!originalMethod) {
+#if TARGET_OS_IPHONE
+        SetNSError(error, @"original method %@ not found for class %@", NSStringFromSelector(originalSEL), [self class]);
+#else
+        SetNSError(error, @"original method %@ not found for class %@", NSStringFromSelector(originalSEL), [self className]);
+#endif
+        return NO;
+    }
+    
+    Method swizzledMethod = class_getInstanceMethod(class, swizzledSEL);
+    if (!swizzledMethod) {
+#if TARGET_OS_IPHONE
+        SetNSError(error, @"alternate method %@ not found for class %@", NSStringFromSelector(swizzledSEL), [self class]);
+#else
+        SetNSError(error, @"alternate method %@ not found for class %@", NSStringFromSelector(swizzledSEL), [self className]);
+#endif
+        return NO;
+    }
+    
+    BOOL didAddMethod =
+    class_addMethod(class,
+                    originalSEL,
+                    method_getImplementation(swizzledMethod),
+                    method_getTypeEncoding(swizzledMethod));
+    
+    if (didAddMethod) {
+        class_replaceMethod(class,
+                            swizzledSEL,
+                            method_getImplementation(originalMethod),
+                            method_getTypeEncoding(originalMethod));
+    } else {
+        method_exchangeImplementations(originalMethod, swizzledMethod);
+    }
+    
+    return YES;
+}
+
++ (BOOL)swizzleClassMethod:(SEL)originalSEL withClassMethod:(SEL)swizzledSEL error:(NSError **)error
+{
+    return [GetClass((id)self) swizzleMethod:originalSEL withMethod:swizzledSEL error:error];
+}
+
+@end
+
 
 @implementation UIButton (ContentRect)
+
+static const char *titleRectKey = "DJTitleRectKey";
+static const char *imageRectKey = "DJImageRectKey";
+
++ (void)load
+{
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        [self swizzleMethod:@selector(titleRectForContentRect:) withMethod:@selector(dj_titleRectForContentRect:) error:nil];
+        [self swizzleMethod:@selector(imageRectForContentRect:) withMethod:@selector(dj_imageRectForContentRect:) error:nil];
+    });
+}
+
+- (CGRect)titleRect
+{
+    NSValue *rectValue = objc_getAssociatedObject(self, titleRectKey);
+    return [rectValue CGRectValue];
+}
+
+- (void)setTitleRect:(CGRect)rect
+{
+    objc_setAssociatedObject(self, titleRectKey, [NSValue valueWithCGRect:rect], OBJC_ASSOCIATION_RETAIN);
+}
+
+- (CGRect)imageRect
+{
+    NSValue *rectValue = objc_getAssociatedObject(self, imageRectKey);
+    return [rectValue CGRectValue];
+}
+
+- (void)setImageRect:(CGRect)rect
+{
+    objc_setAssociatedObject(self, imageRectKey, [NSValue valueWithCGRect:rect], OBJC_ASSOCIATION_RETAIN);
+}
+
+- (CGRect)dj_titleRectForContentRect:(CGRect)contentRect
+{
+    if (!CGRectIsEmpty(self.titleRect) && !CGRectEqualToRect(self.titleRect, CGRectZero))
+    {
+        return self.titleRect;
+    }
+    return [self dj_titleRectForContentRect:contentRect];
+    
+}
+
+- (CGRect)dj_imageRectForContentRect:(CGRect)contentRect
+{
+    if (!CGRectIsEmpty(self.imageRect) && !CGRectEqualToRect(self.imageRect, CGRectZero))
+    {
+        return self.imageRect;
+    }
+    return [self dj_imageRectForContentRect:contentRect];
+}
 
 - (void)layoutButtonWithEdgeInsetsStyle:(DJButtonEdgeInsetsStyle)style imageTitleGap:(CGFloat)gap
 {
@@ -294,6 +414,31 @@
     
     self.imageEdgeInsets = UIEdgeInsetsMake(imageInsetsTop, imageInsetsLeft, imageInsetsBottom, imageInsetsRight);
     self.titleEdgeInsets = UIEdgeInsetsMake(titleInsetsTop, titleInsetsLeft, titleInsetsBottom, titleInsetsRight);
+}
+
++ (instancetype)dj_buttonWithFrame:(CGRect)frame imageName:(NSString *)imageName
+{
+    return [UIButton dj_buttonWithFrame:frame image:[UIImage imageNamed:imageName]];
+}
+
++ (instancetype)dj_buttonWithFrame:(CGRect)frame image:(UIImage *)image
+{
+    return [UIButton dj_buttonWithFrame:frame image:image highlightedImage:nil];
+}
+
++ (instancetype)dj_buttonWithFrame:(CGRect)frame imageName:(NSString *)imageName highlightedImageName:(NSString *)highlightedImageName
+{
+    return [UIButton dj_buttonWithFrame:frame image:[UIImage imageNamed:imageName] highlightedImage:[UIImage imageNamed:highlightedImageName]];
+}
+
++ (instancetype)dj_buttonWithFrame:(CGRect)frame image:(UIImage *)image highlightedImage:(UIImage *)highlightedImage
+{
+    UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+    [button setFrame:frame];
+    [button setImage:image forState:UIControlStateNormal];
+    [button setImage:highlightedImage forState:UIControlStateHighlighted];
+    
+    return button;
 }
 
 @end

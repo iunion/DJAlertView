@@ -61,6 +61,8 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
 @property (nonatomic, strong) UIVisualEffectView *alertMarkBgEffectView;
 @property (nonatomic, strong) UIView *alertView;
 
+@property (nonatomic, strong) UIButton *topRightCloseBtn;
+
 @property (nonatomic, strong) UIView *contentView;
 
 @property (nonatomic, strong) UIImageView *iconImageView;
@@ -79,8 +81,20 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
 
 @end
 
-
 @implementation DJAlertView
+@synthesize alertMarkBgColor = _alertMarkBgColor;
+@synthesize alertBgColor = _alertBgColor;
+@synthesize alertTitleColor = _alertTitleColor;
+@synthesize alertTitleFont = _alertTitleFont;
+@synthesize alertMessageColor = _alertMessageColor;
+@synthesize alertMessageFont = _alertMessageFont;
+@synthesize buttonHeight = _buttonHeight;
+@synthesize alertGapLineColor = _alertGapLineColor;
+@synthesize cancleBtnBgColor = _cancleBtnBgColor;
+@synthesize otherBtnBgColor = _otherBtnBgColor;
+@synthesize cancleBtnTextColor = _cancleBtnTextColor;
+@synthesize otherBtnTextColor = _otherBtnTextColor;
+@synthesize btnFont = _btnFont;
 
 - (void)dealloc
 {
@@ -194,6 +208,14 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
         self.alertView.layer.opacity = 0.95;
         self.alertView.clipsToBounds = YES;
         [self.view addSubview:self.alertView];
+
+        self.topRightCloseBtn = [UIButton dj_buttonWithFrame:CGRectMake(alertWidth-40.0f, 6.0f, 40.0f, 40.0f) imageName:@"community_close"];
+        self.topRightCloseBtn.imageRect = CGRectMake(15.0f, 5.0f, 15.0f, 15.0f);
+        [self.topRightCloseBtn addTarget:self action:@selector(dismiss:) forControlEvents:UIControlEventTouchUpInside];
+        self.topRightCloseBtn.enabled = self.shouldDismissOnTapOutside;
+        [self.alertView addSubview:self.topRightCloseBtn];
+        
+        self.showClose = NO;
         
         // icon
         self.iconImageView = [[UIImageView alloc] init];
@@ -273,10 +295,16 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
     {
         window = [UIApplication sharedApplication].keyWindow;
     }
-    if ([[window subviews] count] > 0)
+    
+    if (window)
     {
-        return [[[window subviews] objectAtIndex:0] bounds];
+        return window.bounds;
     }
+//    if ([[window subviews] count] > 0)
+//    {
+//        return [[[window subviews] objectAtIndex:0] bounds];
+//    }
+
     return [[self windowWithLevel:UIWindowLevelNormal] bounds];
 }
 
@@ -455,6 +483,8 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
     CGFloat space = DJAlertViewVerticalElementSpace;
     CGFloat alertWidth = self.alertView.width;
     
+    self.topRightCloseBtn.left = alertWidth-40.0f;
+    
     CGFloat iconWidth = 0;
     CGFloat iconHeight = 0;
     
@@ -499,7 +529,7 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
     
     if (self.alertMessageAttrStr)
     {
-        self.messageLabel.attributedText = self.alertTitleAttrStr;
+        self.messageLabel.attributedText = self.alertMessageAttrStr;
     }
     else
     {
@@ -520,7 +550,7 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
     {
         margin *= 2;
     }
-    else if (IS_IPHONE6P)
+    else if (IS_IPHONE6P || IS_IPHONEXP)
     {
         margin *= 3;
     }
@@ -684,10 +714,55 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
 #pragma mark -
 #pragma mark property
 
+- (void)setAlertMarkBgEffect:(UIVisualEffect *)alertMarkBgEffect
+{
+    _alertMarkBgEffect = alertMarkBgEffect;
+    
+    self.alertMarkBgEffectView.effect = alertMarkBgEffect;
+}
+
+- (void)setAlertTitle:(NSString *)alertTitle
+{
+    _alertTitle = alertTitle;
+    _alertTitleAttrStr = nil;
+
+    [self freshAlertView];
+}
+
+- (void)setAlertMessage:(NSString *)alertMessage
+{
+    _alertMessage = alertMessage;
+    _alertMessageAttrStr = nil;
+
+    [self freshAlertView];
+}
+
+- (void)setAlertTitleAttrStr:(NSMutableAttributedString *)alertTitleAttrStr
+{
+    _alertTitleAttrStr = alertTitleAttrStr;
+    
+    [self freshAlertView];
+}
+
+- (void)setAlertMessageAttrStr:(NSMutableAttributedString *)alertMessageAttrStr
+{
+    _alertMessageAttrStr = alertMessageAttrStr;
+    
+    [self freshAlertView];
+}
+
+- (void)setShowClose:(BOOL)showClose
+{
+    _showClose = showClose;
+    
+    self.topRightCloseBtn.hidden = !showClose;
+}
+
 - (void)setShouldDismissOnTapOutside:(BOOL)shouldDismissOnTapOutside
 {
     _shouldDismissOnTapOutside = shouldDismissOnTapOutside;
     self.tapOutside.enabled = shouldDismissOnTapOutside;
+    self.topRightCloseBtn.enabled = shouldDismissOnTapOutside;
 }
 
 - (UIColor *)alertMarkBgColor
@@ -700,6 +775,13 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
     return _alertMarkBgColor;
 }
 
+- (void)setAlertMarkBgColor:(UIColor *)alertMarkBgColor
+{
+    alertMarkBgColor = _alertMarkBgColor;
+    
+    self.backgroundView.backgroundColor = alertMarkBgColor;
+}
+
 - (UIColor *)alertBgColor
 {
     if (!_alertBgColor)
@@ -708,6 +790,13 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
     }
     
     return _alertBgColor;
+}
+
+- (void)setAlertBgColor:(UIColor *)alertBgColor
+{
+    _alertBgColor = alertBgColor;
+    
+    self.alertView.backgroundColor = alertBgColor;
 }
 
 - (UIColor *)alertTitleColor
@@ -720,6 +809,13 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
     return _alertTitleColor;
 }
 
+- (void)setAlertTitleColor:(UIColor *)alertTitleColor
+{
+    _alertTitleColor = alertTitleColor;
+    
+    self.titleLabel.textColor = alertTitleColor;
+}
+
 - (UIFont *)alertTitleFont
 {
     if (!_alertTitleFont)
@@ -728,6 +824,13 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
     }
     
     return _alertTitleFont;
+}
+
+- (void)setAlertTitleFont:(UIFont *)alertTitleFont
+{
+    _alertTitleFont = alertTitleFont;
+    
+    [self freshAlertView];
 }
 
 - (UIColor *)alertMessageColor
@@ -740,6 +843,13 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
     return _alertMessageColor;
 }
 
+- (void)setAlertMessageColor:(UIColor *)alertMessageColor
+{
+    _alertMessageColor = alertMessageColor;
+    
+    self.messageLabel.textColor = alertMessageColor;
+}
+
 - (UIFont *)alertMessageFont
 {
     if (!_alertMessageFont)
@@ -748,6 +858,13 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
     }
     
     return _alertMessageFont;
+}
+
+- (void)setAlertMessageFont:(UIFont *)alertMessageFont
+{
+    _alertMessageFont = alertMessageFont;
+    
+    [self freshAlertView];
 }
 
 - (CGFloat)buttonHeight
@@ -760,6 +877,13 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
     return _buttonHeight;
 }
 
+- (void)setButtonHeight:(CGFloat)buttonHeight
+{
+    _buttonHeight = buttonHeight;
+ 
+    [self freshAlertView];
+}
+
 - (UIColor *)alertGapLineColor
 {
     if (!_alertGapLineColor)
@@ -768,6 +892,16 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
     }
     
     return _alertGapLineColor;
+}
+
+- (void)setAlertGapLineColor:(UIColor *)alertGapLineColor
+{
+    _alertGapLineColor = alertGapLineColor;
+    
+    for (CALayer *lineLayer in self.lineLayerArray)
+    {
+        lineLayer.backgroundColor = alertGapLineColor.CGColor;
+    }
 }
 
 - (UIColor *)cancleBtnBgColor
@@ -780,6 +914,18 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
     return _cancleBtnBgColor;
 }
 
+- (void)setCancleBtnBgColor:(UIColor *)cancleBtnBgColor
+{
+    _cancleBtnBgColor = cancleBtnBgColor;
+    
+    if (self.buttonArray.count)
+    {
+        UIButton *button = self.buttonArray[0];
+        
+        button.backgroundColor = cancleBtnBgColor;
+    }
+}
+
 - (UIColor *)otherBtnBgColor
 {
     if (!_otherBtnBgColor)
@@ -788,6 +934,18 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
     }
     
     return _otherBtnBgColor;
+}
+
+- (void)setOtherBtnBgColor:(UIColor *)otherBtnBgColor
+{
+    _otherBtnBgColor = otherBtnBgColor;
+    
+    for (NSUInteger index=1; index<self.buttonArray.count; index++)
+    {
+        UIButton *button = self.buttonArray[index];
+        
+        button.backgroundColor = otherBtnBgColor;
+    }
 }
 
 - (UIColor *)cancleBtnTextColor
@@ -800,6 +958,19 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
     return _cancleBtnTextColor;
 }
 
+- (void)setCancleBtnTextColor:(UIColor *)cancleBtnTextColor
+{
+    _cancleBtnTextColor = cancleBtnTextColor;
+    
+    if (self.buttonArray.count)
+    {
+        UIButton *button = self.buttonArray[0];
+        
+        [button setTitleColor:cancleBtnTextColor forState:UIControlStateNormal];
+        [button setTitleColor:[cancleBtnTextColor colorByDarkeningTo:0.8f] forState:UIControlStateHighlighted];
+    }
+}
+
 - (UIColor *)otherBtnTextColor
 {
     if (!_otherBtnTextColor)
@@ -810,6 +981,19 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
     return _otherBtnTextColor;
 }
 
+- (void)setOtherBtnTextColor:(UIColor *)otherBtnTextColor
+{
+    _otherBtnTextColor = otherBtnTextColor;
+    
+    for (NSUInteger index=1; index<self.buttonArray.count; index++)
+    {
+        UIButton *button = self.buttonArray[index];
+        
+        [button setTitleColor:otherBtnTextColor forState:UIControlStateNormal];
+        [button setTitleColor:[otherBtnTextColor colorByDarkeningTo:0.8f] forState:UIControlStateHighlighted];
+    }
+}
+
 - (UIFont *)btnFont
 {
     if (!_btnFont)
@@ -818,6 +1002,16 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
     }
     
     return _btnFont;
+}
+
+- (void)setBtnFont:(UIFont *)btnFont
+{
+    _btnFont = btnFont;
+    
+    for (UIButton *button in self.buttonArray)
+    {
+        button.titleLabel.font = btnFont;
+    }
 }
 
 
@@ -887,12 +1081,12 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
 - (void)doCompletion:(id)sender
 {
     BOOL cancelled = NO;
-    if (sender == self.tapOutside || (self.buttonArray.count > 0 && sender == self.buttonArray[0]))
+    if (sender == self.tapOutside || self.topRightCloseBtn || (self.buttonArray.count > 0 && sender == self.buttonArray[0]))
     {
         cancelled = YES;
     }
     NSInteger buttonIndex = -1;
-    if (sender && sender != self.tapOutside && self.buttonArray.count)
+    if (sender && sender != self.tapOutside && sender != self.topRightCloseBtn && self.buttonArray.count)
     {
         NSUInteger index = [self.buttonArray indexOfObject:sender];
         if (index != NSNotFound)
@@ -967,7 +1161,7 @@ static const CGFloat DJAlertViewVerticalEdgeMinMargin = 25.0f;
                 break;
                 
             default:
-                 [self dismissCompletion:sender];
+                [self dismissCompletion:sender];
                 break;
         }
     }

@@ -81,7 +81,7 @@
                                                   }];
     alertView.alertMarkBgEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleLight];
     alertView.alertMarkBgColor = [UIColor colorWithHex:0x0000FF alpha:0.1];
-    [alertView showAlertView];
+    //[alertView showAlertView];
 }
 
 - (IBAction)showSimpleCustomizedAlertView:(id)sender
@@ -108,7 +108,7 @@
     alertView.cancleBtnBgColor = [UIColor colorWithHex:0xEE45E3];
     alertView.buttonHeight = 50;
     
-    [alertView showAlertView];
+    //[alertView showAlertView];
 }
 
 - (IBAction)showLargeAlertView:(id)sender
@@ -159,7 +159,7 @@
     
     alertView.alertGapLineColor = [UIColor yellowColor];
     
-    [alertView showAlertView];
+    //[alertView showAlertView];
 }
 
 - (IBAction)showTwoStackedButtonAlertView:(id)sender
@@ -194,7 +194,7 @@
     
     alertView.alertGapLineColor = [UIColor colorWithHex:0x22EE11];
     
-    [alertView showAlertView];
+    //[alertView showAlertView];
 }
 
 - (IBAction)showMultiButtonAlertView:(id)sender
@@ -217,7 +217,7 @@
     alertView.cancleBtnBgColor = [UIColor greenColor];
     alertView.otherBtnBgColor = [UIColor greenColor];
     
-    [alertView showAlertView];
+    //[alertView showAlertView];
 }
 
 - (IBAction)showAlertViewWithContentView:(id)sender

@@ -16,6 +16,7 @@
 #define IS_IPHONE6  (CGSizeEqualToSize(CGSizeMake(375.0f, 667.0f), [[UIScreen mainScreen] bounds].size) ? YES : NO)
 #define IS_IPHONE6P (CGSizeEqualToSize(CGSizeMake(414.0f, 736.0f), [[UIScreen mainScreen] bounds].size) ? YES : NO)
 #define IS_IPHONEX  (CGSizeEqualToSize(CGSizeMake(375.0f, 812.0f), [[UIScreen mainScreen] bounds].size) ? YES : NO)
+#define IS_IPHONEXP (CGSizeEqualToSize(CGSizeMake(414.0f, 896.0f), [[UIScreen mainScreen] bounds].size) ? YES : NO)
 
 @interface NSString (Size)
 
@@ -54,6 +55,12 @@
 
 @end
 
+@interface NSObject (DJSwizzle)
+
++ (BOOL)swizzleMethod:(nonnull SEL)originalSEL withMethod:(nonnull SEL)swizzledSEL error:(NSError * _Nullable * _Nullable)error;
++ (BOOL)swizzleClassMethod:(nonnull SEL)originalSEL withClassMethod:(nonnull SEL)swizzledSEL error:(NSError * _Nullable * _Nullable)error;
+
+@end
 
 typedef NS_ENUM(NSUInteger, DJButtonEdgeInsetsStyle)
 {
@@ -65,7 +72,15 @@ typedef NS_ENUM(NSUInteger, DJButtonEdgeInsetsStyle)
 
 @interface UIButton (ContentRect)
 
+@property (nonatomic, assign) CGRect titleRect;
+@property (nonatomic, assign) CGRect imageRect;
+
 - (void)layoutButtonWithEdgeInsetsStyle:(DJButtonEdgeInsetsStyle)style imageTitleGap:(CGFloat)gap;
+
++ (nonnull instancetype)dj_buttonWithFrame:(CGRect)frame imageName:(nonnull NSString *)imageName;
++ (nonnull instancetype)dj_buttonWithFrame:(CGRect)frame image:(nullable UIImage *)image;
++ (nonnull instancetype)dj_buttonWithFrame:(CGRect)frame imageName:(nonnull NSString *)imageName highlightedImageName:(nonnull NSString *)highlightedImageName;
++ (nonnull instancetype)dj_buttonWithFrame:(CGRect)frame image:(nullable UIImage *)image highlightedImage:(nullable UIImage *)highlightedImage;
 
 @end
 
